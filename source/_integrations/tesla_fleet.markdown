@@ -40,7 +40,7 @@ The Tesla Fleet API {% term integration %} exposes various sensors from Tesla ve
 
 ## Prerequisites
 
-You must have a [Tesla](https://tesla.com) account, and a [Developer Application](https://developer.tesla.com/en_AU/dashboard) (change the locale to `en-US` or wherever your account is based, using the globe icon at the top-right corner).
+You must have a [Tesla](https://tesla.com) account, and a [Developer Application](https://developer.tesla.com/en_US/dashboard) (change the locale if necessary to wherever your account is based, using the globe icon at the top-right corner).
 
 ### Developer Application
 
@@ -49,9 +49,38 @@ When creating the application, you must set the redirect URL to `https://my.home
 
 {% include integrations/config_flow.md %}
 
+{% details "Setting up the Developer Application" %}
+
+1. If you have not already, set up your [Tesla Developer account](https://developer.tesla.com/teslaaccount). Confirm that you have a verified email and multi-factor authentication set up.
+2. Navigate to the [Developer dashboard](https://developer.tesla.com/en_US/dashboard).
+3. Click '**Create New Application**'. This should launch a new page with the header '**Create Fleet API Application**'.
+4. In most normal cases, select '**Just for me**' under '**Registration Type**'. If you're confident about your situation being a business set-up instead, select '**For my business**'. Click '**Next**'.
+5. At the '**Application Details**' step, use a name that is easy to refer to later, such as `ha-integration`. This will be needed later while configuring the integration. Click '**Next**'.
+6. Under '**Oauth Grant Type**' at the '**Client Details**' step, select '**Authorization Code and Machine-to-Machine**'.
+   - Under '**Allowed Origin URL(s)**', enter `https://my.home-assistant.io/`. Feel free to add any other URLs here depending on your setup.
+   - Under '**Allowed Redirect URI(s)**', enter `https://my.home-assistant.io/redirect/oauth`.
+   - Click '**Next**'.
+7. At the '**API & Scopes**' step, select the configurations you'd like to access. At least one of `Vehicle Information` or `Energy Product Information` **must** be selected for the integration to function. It is recommended you select all scopes for full functionality. If you're unsure, you can select only one of these two required scopes for now and update the scopes later from the Developer Dashboard. Click '**Next**'.
+8. At the '**Billing Details (Optional)**' step, enter your billing details if needed. Tesla provides a $10 monthly credit for personal API usage, so your level of usage may be covered for free. Detailed pricing info for commands, data polling, and wake signals can be found at [developer.tesla.com](https://developer.tesla.com). Use these details to calculate your usage estimate if you rely heavily on this integration. If unsure, you can click the '**Skip & Submit**' button for now and add the billing details later when your usage is close to the free threshold.
+
+{% enddetails %}
+
+{% details "Linking the Developer Application with Home Assistant" %}
+
+1. Get your OAuth details by going to your [Developer Dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Credentials & APIs**' tab. Note the `Client ID` and `Client Secret` strings, these will be needed later.
+2. In Home Assistant, the Tesla Fleet integration wizard should walk you through the default steps. If not already started, scroll above and click the '**ADD INTEGRATION TO MY**' button to start the integration wizard. The integration will ask you for all of the necessary integration configuration.
+3. In the '**Add credentials**' step in the wizard, enter the Tesla Fleet Developer app name (from step 5 in the previous '**Setting up the Developer Application**' section above), and the Oauth Client ID and Client Secret (from step 1 above). Click '**Submit**'.
+4. You may be asked to re-enter your Tesla account login credentials.
+5. At the confirmation page with the header "Allow ha_integration access to your Tesla Account", click the '**Select All**' button. This list of scopes is already limited to the specific scopes defined at in the app information earlier. Click '**Allow**'.
+6. Page that asks 'Link account to Home Assistant?'. Click 'Link account'.
+7. Popup. Title: Tesla Fleet. Message: Re-authentication was successful.
+
+{% enddetails %}
+
+
 ## Scopes
 
-When connecting your Tesla account to Home Assistant, you **must** select the `Vehicle Information` or `Energy Product Information` scope. It is recommended you select all scopes for full functionality. The `Vehicle Location` scope was added in Home Assistant 2024.1, so any authorizations performed on previous releases that want this scope will need to be [modified](https://accounts.tesla.com/en_au/account-settings/security?tab=tpty-apps).
+When connecting your Tesla account to Home Assistant, you **must** select at least one of the `Vehicle Information` or `Energy Product Information` scopes. It is recommended you select all scopes for full functionality. The `Vehicle Location` scope was added in Home Assistant 2024.1, so any authorizations performed on previous releases that want this scope will need to be [modified](https://accounts.tesla.com/en_au/account-settings/security?tab=tpty-apps).
 
 ## Pay per use
 	
@@ -63,7 +92,9 @@ Previously, Tesla restricted this integration to a very modest rate limit. Howev
 - Energy product APIs are free to use at this time
 - To go beyond the free credit, you must provide payment details to Tesla
 
-For more details please see [developer.tesla.com](https://developer.tesla.com).
+For more details, please see [developer.tesla.com](https://developer.tesla.com).
+
+You can view your current billing usage at any time by going to your [Developer Dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Application Usage**' tab.
 
 ## Command signing
 
@@ -232,3 +263,15 @@ The Tesla Fleet API only provides power data for Powerwall and Solar products. T
 Energy flows can be calculated from `Battery power` and `Grid power` sensors using a [Template Sensor](/integrations/template/) to separate the positive and negative values into positive import and export values.
 The `Load power`, `Solar power`, and the templated sensors can then use a [Riemann Sum](/integrations/integration/) to convert their instant power (kW) values into cumulative energy values (kWh),
 which then can be used within the energy dashboard.
+
+## Troubleshooting
+
+- **Integration is broken after the January 2025 API pricing updates**
+  1. Follow the instructions in the '**Setting up the Developer Application**' section above.
+  2. Go to your Tesla Fleet integration page in Home Assistant, then click the '**RECONFIGURE**' button to bring the integration wizard up.
+     - If the '**RECONFIGURE**' button is not visible, clear any Application Credentials related to Tesla Fleet from your Application Credentials page (can be found at `http://homeassistant.local:PORT/config/application_credentials`), then restart Home Assistant. After the restart, navigate to the Tesla Fleet integration page and the '**RECONFIGURE**' button should be visible.
+  3. Follow the steps in the '**Linking the Developer Application with Home Assistant**' section above.
+
+- **Integration shows errors even after successfully authorizing with the Tesla developer app**
+  1. The error log should usually help communicate if a specific piece in the integration is missing.
+  2. Sometimes a simple restart of Home Assistant should help it re-establish the connection with Tesla's API. You may be asked to re-authenticate in some cases.
