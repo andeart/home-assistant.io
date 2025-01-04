@@ -40,7 +40,7 @@ The Tesla Fleet API {% term integration %} exposes various sensors from Tesla ve
 
 ## Prerequisites
 
-You must have a [Tesla](https://tesla.com) account, and a [Developer Application](https://developer.tesla.com/en_AU/dashboard).
+You must have a [Tesla](https://tesla.com) account, and a [Developer Application](https://developer.tesla.com/en_AU/dashboard) (change the locale to `en-US` or wherever your account is based, using the globe icon at the top-right corner).
 
 ### Developer Application
 
@@ -57,7 +57,7 @@ When connecting your Tesla account to Home Assistant, you **must** select the `V
 	
 Previously, Tesla restricted this integration to a very modest rate limit. However, from January 2025, accounts in eligible countries will be charged for every API call. Here's what you need to know:
 
-- Tesla provides a $10 credit per developer account per calandar month
+- Tesla provides a $10 credit per developer account per calendar month
 - Every vehicle coordinator refresh, vehicle command, and wake up has a cost
 - This credit only allows for a maximum of 5000 coordinator refreshes
 - Energy product APIs are free to use at this time
