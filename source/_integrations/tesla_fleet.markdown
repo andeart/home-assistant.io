@@ -63,7 +63,7 @@ While the [Tesla Fleet API documentation Step 3](https://developer.tesla.com/doc
 
 {% details "Setting up the Developer Application" %}
 
-These steps are also summarized in the [Tesla Fleet API documentation Step 2](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-2-create-an-application), but it recommended to follow the steps below to cover specific details.
+These steps are also summarized in the [Tesla Fleet API documentation Step 2](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-2-create-an-application), but it is recommended to follow the steps below to cover specific details.
 
 1. If you have not already, set up your [Tesla Developer account](https://developer.tesla.com/teslaaccount). Confirm that you have a verified email and multi-factor authentication set up.
 2. Navigate to the [Developer dashboard](https://developer.tesla.com/en_US/dashboard). Change your locale if needed to wherever your account is based, using the globe icon at the top-right corner.
