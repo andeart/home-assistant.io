@@ -44,7 +44,12 @@ You must have:
 
 - A [Tesla](https://tesla.com) account
 - A [Developer Application](https://developer.tesla.com/en_US/dashboard)
-- A web domain that you own and can host your public key file directly onto without needing to rely on URL redirects. Simple file-hosting services such as AWS S3 may help with this for free/cheap.
+- A web domain and host that you can serve your public key file from. Some free options include:
+  - [FleetKey.cc](https://fleetkey.cc)
+  - [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)
+  - [Cloudflare Pages](https://pages.cloudflare.com/)
+  - [Firebase Hosting](https://firebase.google.com/docs/hosting)
+  
 
 {% include integrations/config_flow.md %}
 
