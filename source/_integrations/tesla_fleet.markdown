@@ -43,7 +43,7 @@ The Tesla Fleet API {% term integration %} exposes various sensors from Tesla ve
 You must have:
 - A [Tesla](https://tesla.com) account
 - A [Developer Application](https://developer.tesla.com/en_US/dashboard)
-- A privately-owned web domain where you can host your public key file without needing to rely on redirects. Simple file-hosting services such as AWS S3 may help with this for free/cheap.
+- A web domain that you own and can host your public key file directly onto without needing to rely on URL redirects. Simple file-hosting services such as AWS S3 may help with this for free/cheap.
 
 {% include integrations/config_flow.md %}
 
@@ -88,9 +88,14 @@ These steps are also summarized in the [Tesla Fleet API documentation Step 2](ht
 
 These steps are also summarized in the [Tesla Fleet API documentation Step 4](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-4-call-the-register-endpoint), but the steps below provide easier copy-pasteable code and additional checks.
 
+{% warning %}
+The following steps involve sensitive credentials. Never share your `Client Secret` or access token with anyone directly, and ensure you're working in a secure environment.
+{% endwarning %}
+
 1. Get your OAuth details by going to your [Developer dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Credentials & APIs**' tab. Note the `Client ID` and `Client Secret` strings.
+
 2. Set the following variables and run this CURL request:
-   ```
+   ```shell
    CLIENT_ID=REPLACE_THIS_WITH_YOUR_CLIENT_ID
    CLIENT_SECRET=REPLACE_THIS_WITH_YOUR_CLIENT_SECRET
    AUDIENCE="https://fleet-api.prd.na.vn.cloud.tesla.com"
@@ -108,12 +113,12 @@ These steps are also summarized in the [Tesla Fleet API documentation Step 4](ht
    - Replace the `AUDIENCE` value with your region specific URL as needed. Refer to the [Base URLs documentation](https://developer.tesla.com/docs/fleet-api/getting-started/base-urls).
    - For the `scope=...` line, replace the values with a space-delimited list of [the official scope keywords](https://developer.tesla.com/docs/fleet-api/authentication/overview#scopes), as you defined them earlier in your app.
 3. The CURL request should return a response that looks something like:
-   ```
-   {"access_token":"LONG_GIBBERISH_ACCESS_TOKEN_STRING","expires_in":28800,"token_type":"Bearer"}%
+   ```json
+   {"access_token":"LONG_GIBBERISH_ACCESS_TOKEN_STRING","expires_in":28800,"token_type":"Bearer"}
    ```
    This is your access token. Copy everything between the double-quotes to be used next.
 4. Run the following CURL request:
-   ```
+   ```shell
    curl --location 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts' \
    --header 'Content-Type: application/json' \
    --header 'Authorization: Bearer LONG_GIBBERISH_ACCESS_TOKEN_STRING' \
