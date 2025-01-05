@@ -342,6 +342,6 @@ which then can be used within the energy dashboard.
 - **Integration no longer works after the January 2025 API pricing updates**
   1. Refer to the '**Integration is broken**' troubleshooting steps above.
 
-- **Integration shows errors even after successfully authorizing with the Tesla developer app**
-  1. The error log should usually help communicate if a specific piece in the integration is missing.
+- **Integration shows `a condition has not been met to process the request`**
+  1. Confirm that you've run all the steps from both the '**Hosting a Public/Private Key Pair**' and '**Register your application as a Fleet API partner**' sections above.
   
