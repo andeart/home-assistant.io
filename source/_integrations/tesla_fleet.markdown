@@ -77,7 +77,7 @@ These steps are also summarized in the [Tesla Fleet API documentation Step 2](ht
    - At least one of `Vehicle Information` or `Energy Product Information` **must** be selected for the integration to function. It is recommended you select all scopes for full functionality.
    - If you're unsure, you can select only one of these two required scopes for now and update the scopes later from the Developer Dashboard. However, note that if the scopes are updated, you will need to reconfigure the integration fully (refer to the '**Integration is broken and needs to be reconfigured**' troubleshooting steps below).
    - Click '**Next**'.
-8. At the '**Billing Details (Optional)**' step, enter your billing details if needed, then click '**Submit**'.
+8. At the '**Billing Details (Optional)**' step, enter your billing details if needed, then click '**Submit**'. Tesla does not support billing in all countries yet. **Developers in countries that do not yet support payments will not see this step**.
    - Tesla provides a $10 monthly credit for personal API usage, so your level of usage may be covered for free. Detailed pricing info for commands, data polling, and wake signals can be found at [developer.tesla.com](https://developer.tesla.com). Use these details to calculate your usage estimate if you rely heavily on this integration.
    - If unsure, you can click '**Skip & Submit**' for now and add the billing details later when your usage is close to the free threshold.
 9. Your developer application is ready for use!
@@ -94,7 +94,8 @@ The following steps involve sensitive credentials. Never share your `Client Secr
 
 1. Get your OAuth details by going to your [Developer dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Credentials & APIs**' tab. Note the `Client ID` and `Client Secret` strings.
 
-2. Set the following variables and run this CURL request:
+2. Run this CURL request, replacing the variable values as specified in the notes below:
+  
    ```shell
    CLIENT_ID=REPLACE_THIS_WITH_YOUR_CLIENT_ID
    CLIENT_SECRET=REPLACE_THIS_WITH_YOUR_CLIENT_SECRET
@@ -108,16 +109,20 @@ The following steps involve sensitive credentials. Never share your `Client Secr
      --data-urlencode "audience=$AUDIENCE" \
      'https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token'
    ```
-   A few things to note about the variable values:
-   - For the `CLIENT_SECRET` value, depending on your terminal environment, you may need to escape any '!' and '$' signs in the value, or the curl request will fail.
-   - Replace the `AUDIENCE` value with your region specific URL as needed. Refer to the [Base URLs documentation](https://developer.tesla.com/docs/fleet-api/getting-started/base-urls).
+  
+   Notes about the variable values:
+   - For the `CLIENT_SECRET` value, depending on your terminal environment, you may need to escape any `!` and `$` characters in the string, or the curl request will fail.
+   - Replace the `AUDIENCE` value with your region-specific URL. The URL in the example is for users in North America and Asia-Pacific (excluding China). Refer to the [Base URLs documentation](https://developer.tesla.com/docs/fleet-api/getting-started/base-urls) for the URLs for other regions.
    - For the `scope=...` line, replace the values with a space-delimited list of [the official scope keywords](https://developer.tesla.com/docs/fleet-api/authentication/overview#scopes), as you defined them earlier in your app.
 3. The CURL request should return a response that looks something like:
+  
    ```json
    {"access_token":"LONG_GIBBERISH_ACCESS_TOKEN_STRING","expires_in":28800,"token_type":"Bearer"}
    ```
+  
    This is your access token. Copy everything between the double-quotes to be used next.
-4. Run the following CURL request:
+4. Run this CURL request, replacing the variable values as specified in the notes below:
+  
    ```shell
    curl --location 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts' \
    --header 'Content-Type: application/json' \
@@ -126,7 +131,8 @@ The following steps involve sensitive credentials. Never share your `Client Secr
        "domain": "my.domain.com"
    }'
    ```
-   - If you changed the `AUDIENCE` in the previous step, update the `--location` accordingly in this step.
+  
+   - If you had to change the `AUDIENCE` URL for your region in step 2, update the main domain of the `--location` arg.
    - Replace `LONG_GIBBERISH_ACCESS_TOKEN_STRING` with the access token that you copied in the previous step.
    - In the `domain:` line, enter your domain without the leading `https://` and the trailing `/`.
 5. You should see a response that contains information about your Tesla Fleet developer app, pricing info, and such. This confirms that the Tesla Fleet API has successfully registered your developer application as a partner. The hard part is over.
@@ -162,7 +168,7 @@ Previously, Tesla restricted this integration to a very modest rate limit. Howev
 
 For more details, please see [developer.tesla.com](https://developer.tesla.com).
 
-You can view your current billing usage at any time by going to your [Developer Dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Application Usage**' tab.
+Note that Tesla does not support billing in all countries yet. **Developers in countries that do not yet support payments will not be able to review their billing or usage**. For countries that do support billing, the current billing usage can be viewed at any time by going to your [Developer Dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Application Usage**' tab.
 
 ## Command signing
 
