@@ -40,24 +40,37 @@ The Tesla Fleet API {% term integration %} exposes various sensors from Tesla ve
 
 ## Prerequisites
 
-You must have a [Tesla](https://tesla.com) account, and a [Developer Application](https://developer.tesla.com/en_US/dashboard) (change your locale if needed to wherever your account is based, using the globe icon at the top-right corner).
-
-### Developer Application
-
-You must [create your own application](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-2-create-an-application) for the Tesla Fleet API and configure it as an [application credential](https://my.home-assistant.io/redirect/application_credentials).
-When creating the application, you must set the redirect URL to `https://my.home-assistant.io/redirect/oauth`, but the other URLs can be set as desired. You must also complete both [step 3](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-3-generate-a-public-private-key-pair) and [step 4](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-4-call-the-register-endpoint) before the application will be able to make API calls. Step-by-step instructions can be found below on this page.
+You must have:
+- A [Tesla](https://tesla.com) account
+- A [Developer Application](https://developer.tesla.com/en_US/dashboard)
+- A privately-owned web domain where you can host your public key file without needing to rely on redirects. Simple file-hosting services such as AWS S3 may help with this for free/cheap.
 
 {% include integrations/config_flow.md %}
 
+{% details "Hosting a Public/Private Key Pair" %}
+
+While the [Tesla Fleet API documentation Step 3](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-3-generate-a-public-private-key-pair) mentions this as a later step, it is recommended that you do this first to ensure key reachability before the rest of the integration.
+
+1. Open a new terminal on your computer.
+2. Run this command to create a private key: `openssl ecparam -name prime256v1 -genkey -noout -out private-key.pem`
+3. Run this command to create and associate a public key with it: `openssl ec -in private-key.pem -pubout -out public-key.pem`
+4. Rename the public key file to `com.tesla.3p.public-key.pem`. This needs to be exactly this for Tesla's API to partner with your account correctly.
+5. Backup both these files somewhere safe and private for access later.
+6. Upload the public key file to your domain at the path `/.well-known/appspecific/com.tesla.3p.public-key.pem`. For example, if your domain is `https://my.domain.com`, the public key file must be accessible at `https://my.domain.com/.well-known/appspecific/com.tesla.3p.public-key.pem` . Do not use redirection logic to handle this, or the Tesla API will not recognize your app later in the process.
+
+{% enddetails %}
+
 {% details "Setting up the Developer Application" %}
 
+These steps are also summarized in the [Tesla Fleet API documentation Step 2](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-2-create-an-application), but it recommended to follow the steps below to cover specific details.
+
 1. If you have not already, set up your [Tesla Developer account](https://developer.tesla.com/teslaaccount). Confirm that you have a verified email and multi-factor authentication set up.
-2. Navigate to the [Developer dashboard](https://developer.tesla.com/en_US/dashboard).
+2. Navigate to the [Developer dashboard](https://developer.tesla.com/en_US/dashboard). Change your locale if needed to wherever your account is based, using the globe icon at the top-right corner.
 3. Click '**Create New Application**'. This should launch a new page with the header '**Create Fleet API Application**'.
 4. For simple integrations, under '**Registration Type**', select '**Just for me**'. If you're confident about your situation being a business setup instead, select '**For my business**'. Click '**Next**'.
 5. At the '**Application Details**' step, use a name that is easy to refer to later, such as `ha-integration`. This will be needed later while configuring the integration. Click '**Next**'.
 6. At the '**Client Details**' step, under '**Oauth Grant Type**', select '**Authorization Code and Machine-to-Machine**'.
-   - Under '**Allowed Origin URL(s)**', enter `https://my.home-assistant.io/`. Feel free to add any other URLs here depending on your setup.
+   - Under '**Allowed Origin URL(s)**', enter your domain where you hosted your public key earlier. Using the example above, this would be `https://my.domain.com/`.
    - Under '**Allowed Redirect URI(s)**', enter `https://my.home-assistant.io/redirect/oauth`.
    - Click '**Next**'.
 7. At the '**API & Scopes**' step, select the configurations you'd like to access.
@@ -67,6 +80,51 @@ When creating the application, you must set the redirect URL to `https://my.home
 8. At the '**Billing Details (Optional)**' step, enter your billing details if needed, then click '**Submit**'.
    - Tesla provides a $10 monthly credit for personal API usage, so your level of usage may be covered for free. Detailed pricing info for commands, data polling, and wake signals can be found at [developer.tesla.com](https://developer.tesla.com). Use these details to calculate your usage estimate if you rely heavily on this integration.
    - If unsure, you can click '**Skip & Submit**' for now and add the billing details later when your usage is close to the free threshold.
+   - 
+
+{% enddetails %}
+
+{% details "Register your application as a Fleet API partner" %}
+
+These steps are also summarized in the [Tesla Fleet API documentation Step 4](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api#step-4-call-the-register-endpoint), but the steps below provide easier copy-pasteable code and additional checks.
+
+1. Get your OAuth details by going to your [Developer dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Credentials & APIs**' tab. Note the `Client ID` and `Client Secret` strings.
+2. Set the following variables and run this CURL request:
+   ```
+   CLIENT_ID=REPLACE_THIS_WITH_YOUR_CLIENT_ID
+   CLIENT_SECRET=REPLACE_THIS_WITH_YOUR_CLIENT_SECRET
+   AUDIENCE="https://fleet-api.prd.na.vn.cloud.tesla.com"
+   curl --request POST \
+     --header 'Content-Type: application/x-www-form-urlencoded' \
+     --data-urlencode 'grant_type=client_credentials' \
+     --data-urlencode "client_id=$CLIENT_ID" \
+     --data-urlencode "client_secret=$CLIENT_SECRET" \
+     --data-urlencode 'scope=openid vehicle_device_data vehicle_cmds vehicle_charging_cmds' \
+     --data-urlencode "audience=$AUDIENCE" \
+     'https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3/token'
+   ```
+   A few things to note about the variable values:
+   - For the `CLIENT_SECRET` value, depending on your terminal environment, you may need to escape any '!' and '$' signs in the value, or the curl request will fail.
+   - Replace the `AUDIENCE` value with your region specific URL as needed. Refer to the [Base URLs documentation](https://developer.tesla.com/docs/fleet-api/getting-started/base-urls).
+   - For the `scope=...` line, replace the values with a space-delimited list of [the official scope keywords](https://developer.tesla.com/docs/fleet-api/authentication/overview#scopes), as you defined them earlier in your app.
+3. The CURL request should return a response that looks something like:
+   ```
+   {"access_token":"LONG_GIBBERISH_ACCESS_TOKEN_STRING","expires_in":28800,"token_type":"Bearer"}%
+   ```
+   This is your access token. Copy everything between the double-quotes to be used next.
+4. Run the following CURL request:
+   ```
+   curl --location 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts' \
+   --header 'Content-Type: application/json' \
+   --header 'Authorization: Bearer LONG_GIBBERISH_ACCESS_TOKEN_STRING' \
+   --data '{
+       "domain": "my.domain.com"
+   }'
+   ```
+   - If you changed the `AUDIENCE` in the previous step, update the `--location` accordingly in this step.
+   - Replace `LONG_GIBBERISH_ACCESS_TOKEN_STRING` with the access token that you copied in the previous step.
+   - In the `domain:` line, enter your domain without the leading `https://` and the trailing `/`.
+5. You should see a response that contains information about your Tesla Fleet developer app, pricing info, and such. This confirms that the Tesla Fleet API has successfully registered your developer application as a partner. The hard part is over.
 
 {% enddetails %}
 
@@ -74,11 +132,11 @@ When creating the application, you must set the redirect URL to `https://my.home
 
 1. Get your OAuth details by going to your [Developer dashboard](https://developer.tesla.com/en_US/dashboard), clicking '**View Details**' under the app you set up for Home Assistant integration, then clicking on the '**Credentials & APIs**' tab. Note the `Client ID` and `Client Secret` strings, these will be needed later.
 2. In Home Assistant, the integration wizard should walk you through the default steps. If not already started, scroll above and click the '**ADD INTEGRATION TO MY**' button to start the integration wizard. The integration will ask you for all of the necessary integration configuration.
-3. In the '**Add credentials**' step in the wizard, enter your Tesla Fleet developer application name (from step 5 in the previous '**Setting up the Developer Application**' section above), and the Oauth Client ID and Client Secret (from step 1 above). Click '**Submit**'.
-4. At this step, you should be taken to the Tesla authentication page. You may be asked to re-enter your Tesla account login credentials.
-5. At the confirmation page with the header '**Allow ha_integration access to your Tesla Account**' (the name is driven by what you set earlier), click the '**Select All**' button. This list of scopes is already limited to the specific scopes you chose for the application information earlier, so it is not necessary to review them again. Click '**Allow**'.
+3. In the '**Add credentials**' step in the wizard, enter your Tesla Fleet developer application name (from step 5 in the '**Setting up the Developer Application**' section above), and the Oauth Client ID and Client Secret (from step 1 above). Click '**Submit**'.
+4. At this step, you should be taken to the Tesla authentication page. You will need to re-enter your Tesla account login credentials.
+5. At the confirmation page with the header '**Allow ha-integration access to your Tesla Account**' (the specific application name will be whatever you set earlier), click the '**Select All**' button. This list of scopes is already limited to the specific scopes you chose for the application information earlier, so it is not necessary to review them again. Click '**Allow**'.
 6. You should now see a Home Assistant page asking if you would like to '**Link account to Home Assistant?**'. Click '**Link account**'.
-7. You should be all set!
+7. You're all set! The integration should fetch your device details into Home Assistant.
 
 {% enddetails %}
 
@@ -271,6 +329,10 @@ which then can be used within the energy dashboard.
 
 ## Troubleshooting
 
+- **General troubleshooting steps**
+  1. Confirm that your vehicle or energy product can be accessed and updates within the official Tesla app. This rules out any issues that are outside the control of Home Assistant or this integration.
+  2. For some errors in the integration, waking the vehicle or energy product through the official app, then restarting Home Assistant will sometimes help re-authenticate the connection with Tesla's API. You may be asked to re-authenticate through the Tesla website.
+
 - **Integration is broken or needs to be reconfigured**
   1. Ensure that you have a Tesla developer application ready for usage (refer to the instructions in the '**Setting up the Developer Application**' section above).
   2. Go to your Tesla Fleet integration page in Home Assistant, then click the '**RECONFIGURE**' button to bring the integration wizard up.
@@ -282,4 +344,4 @@ which then can be used within the energy dashboard.
 
 - **Integration shows errors even after successfully authorizing with the Tesla developer app**
   1. The error log should usually help communicate if a specific piece in the integration is missing.
-  2. Sometimes a simple restart of Home Assistant should help it re-establish the connection with Tesla's API. You may be asked to re-authenticate in some cases.
+  
