@@ -41,6 +41,7 @@ The Tesla Fleet API {% term integration %} exposes various sensors from Tesla ve
 ## Prerequisites
 
 You must have:
+
 - A [Tesla](https://tesla.com) account
 - A [Developer Application](https://developer.tesla.com/en_US/dashboard)
 - A web domain that you own and can host your public key file directly onto without needing to rely on URL redirects. Simple file-hosting services such as AWS S3 may help with this for free/cheap.
@@ -151,13 +152,12 @@ The following steps involve sensitive credentials. Never share your `Client Secr
 
 {% enddetails %}
 
-
 ## Scopes
 
 When connecting your Tesla account to Home Assistant, you **must** select at least one of the `Vehicle Information` or `Energy Product Information` scopes. It is recommended you select all scopes for full functionality. The `Vehicle Location` scope was added in Home Assistant 2024.1, so any authorizations performed on previous releases that want this scope will need to be [modified](https://accounts.tesla.com/en_au/account-settings/security?tab=tpty-apps).
 
 ## Pay per use
-	
+
 Previously, Tesla restricted this integration to a very modest rate limit. However, from January 2025, accounts in eligible countries will be charged for every API call. Here's what you need to know:
 
 - Tesla provides a $10 credit per developer account per calendar month
