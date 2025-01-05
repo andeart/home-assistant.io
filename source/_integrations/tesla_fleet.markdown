@@ -132,7 +132,7 @@ The following steps involve sensitive credentials. Never share your `Client Secr
    ```shell
    curl --location 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts' \
    --header 'Content-Type: application/json' \
-   --header 'Authorization: Bearer LONG_GIBBERISH_ACCESS_TOKEN_STRING' \
+   --header 'Authorization: Bearer JSON_WEB_TOKEN' \
    --data '{
        "domain": "my.domain.com"
    }'
