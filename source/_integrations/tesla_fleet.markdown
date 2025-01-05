@@ -123,7 +123,7 @@ The following steps involve sensitive credentials. Never share your `Client Secr
 3. The CURL request should return a response that looks something like:
   
    ```json
-   {"access_token":"LONG_GIBBERISH_ACCESS_TOKEN_STRING","expires_in":28800,"token_type":"Bearer"}
+   {"access_token":"JSON_WEB_TOKEN","expires_in":28800,"token_type":"Bearer"}
    ```
   
    This is your access token. Copy everything between the double-quotes to be used next.
