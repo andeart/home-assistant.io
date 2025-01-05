@@ -80,7 +80,7 @@ These steps are also summarized in the [Tesla Fleet API documentation Step 2](ht
 8. At the '**Billing Details (Optional)**' step, enter your billing details if needed, then click '**Submit**'.
    - Tesla provides a $10 monthly credit for personal API usage, so your level of usage may be covered for free. Detailed pricing info for commands, data polling, and wake signals can be found at [developer.tesla.com](https://developer.tesla.com). Use these details to calculate your usage estimate if you rely heavily on this integration.
    - If unsure, you can click '**Skip & Submit**' for now and add the billing details later when your usage is close to the free threshold.
-   - 
+9. Your developer application is ready for use!
 
 {% enddetails %}
 
